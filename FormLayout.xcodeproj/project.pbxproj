@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		5AF0E5D15F74D6A044467145 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5AF0E84CA2A47D82A2552A54 /* Assets.xcassets */; };
 		5AF0E68D04436423EB80BC3B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5AF0EF0C1FEEDBE6679A6A97 /* LaunchScreen.storyboard */; };
-		5AF0E7689CA24E96BEB4EC4B /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5AF0EEE3AAC19D1D119BCC9F /* Info.plist */; };
 		5AF0E76C40BC21C8BCF202F4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AF0E024AC6E80CC3531DDFE /* main.m */; };
 		5AF0E7B502E51CE8432A4BA7 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AF0EDDE3ED1123B3D21F57B /* ViewController.m */; };
 		5AF0EF0DC7084172C54CCBB2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AF0E9BF572F106612DD7D2D /* AppDelegate.m */; };
@@ -103,6 +102,7 @@
 		5AF0E7F440431ECED61B2EDE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "David Clark";
 			};
 			buildConfigurationList = 5AF0E1478023BFAA675779E2 /* Build configuration list for PBXProject "FormLayout" */;
@@ -127,7 +127,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5AF0E7689CA24E96BEB4EC4B /* Info.plist in Resources */,
 				5AF0E5D15F74D6A044467145 /* Assets.xcassets in Resources */,
 				5AF0E68D04436423EB80BC3B /* LaunchScreen.storyboard in Resources */,
 			);
@@ -283,6 +282,7 @@
 				5AF0EBBB217F2CED12970E4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
