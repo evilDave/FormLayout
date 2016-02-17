@@ -8,6 +8,6 @@
 
 @interface UIBarButtonItem (DC)
 
-- (UIBarButtonItem *(^)(int width))withWidth;
+@property (readonly) UIBarButtonItem *(^withWidth)(int width);
 
 @end
