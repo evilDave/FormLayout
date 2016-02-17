@@ -24,6 +24,8 @@
     NSMutableSet *_scrollToTopTextFields;
     UIToolbar *_nextPrevAccessoryView;
     int _maxTag;
+	UIVisualEffectView *_blurEffectView;
+	UIView *_placeholderView;
 }
 
 - (instancetype)init {
@@ -75,7 +77,7 @@
             [[UIBarButtonItem alloc] initWithTitle:@"Next" style:UIBarButtonItemStylePlain target:self action:@selector(nextTextField)] ]];
 
     UITextField *textField = nil;
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 25; ++i) {
         if(i == 3 || i == 12) {
             textField = [self addCustomTextFieldWithText:[NSString stringWithFormat:@"testing%02i", i] toView:_contentView belowView:textField scrollToTop:NO];
         }
@@ -87,6 +89,10 @@
     }
 
     [_contentView.bottomAnchor constraintEqualToAnchor:textField.bottomAnchor].active = YES;
+
+	_blurEffectView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+	[_blurEffectView setAutoresizingMask:UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth];
+	_placeholderView = [[UIView alloc] init];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -134,10 +140,24 @@
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     _editingTextField = textField;
 
-    if([_scrollToTopTextFields containsObject:textField]) {
-        CGPoint point = CGPointMake(_scrollView.contentOffset.x, textField.frame.origin.y);
-        [_scrollView setContentOffset:point animated:YES];
-    }
+//	// TODO: this is not working for controls that start out under where the keyboard will come up, does the layout or change in size cancel the scrolling?
+//    if([_scrollToTopTextFields containsObject:textField]) {
+//        CGPoint point = CGPointMake(_scrollView.contentOffset.x, textField.frame.origin.y);
+//        [_scrollView setContentOffset:point animated:YES];
+//    }
+
+	// TODO: the blulr effect is not done on the window, might need to add a separate one
+	// TODO: blur is way too strong, would like to still see the form controls
+	[_blurEffectView setFrame:_contentView.frame];
+	[_contentView addSubview:_blurEffectView];
+	[_contentView addSubview:_placeholderView];
+	[_contentView exchangeSubviewAtIndex:[_contentView.subviews indexOfObject:_editingTextField] withSubviewAtIndex:[_contentView.subviews indexOfObject:_placeholderView]];
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+	[_contentView exchangeSubviewAtIndex:[_contentView.subviews indexOfObject:_editingTextField] withSubviewAtIndex:[_contentView.subviews indexOfObject:_placeholderView]];
+	[_blurEffectView removeFromSuperview];
+	[_placeholderView removeFromSuperview];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -145,11 +165,19 @@
     return YES;
 }
 
+// TODO: simplify the interaction here, do it all in one place/time if possible, maybe with promises
 - (void)keyboardWillShow:(NSNotification *)notification {
     NSDictionary *userInfo = [notification userInfo];
     CGRect rect = [userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
     [_ScrollViewBottomAnchor setConstant:-rect.size.height];
-    [self.view layoutIfNeeded]; // prevent delay in scrolling
+    [self.view layoutSubviews]; // prevent delay in scrolling
+
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if([_scrollToTopTextFields containsObject:_editingTextField]) {
+			CGPoint point = CGPointMake(_scrollView.contentOffset.x, _editingTextField.frame.origin.y);
+			[_scrollView setContentOffset:point animated:YES];
+		}
+	});
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
