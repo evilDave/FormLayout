@@ -17,8 +17,11 @@
 @implementation ViewController {
     UIScrollView *_scrollView;
     UIView *_contentView;
+    UITextField *_editingTextField;
     NSLayoutConstraint *_ScrollViewBottomAnchor;
     NSMutableSet *_scrollToTopTextFields;
+    UIToolbar *_nextPrevAccessoryView;
+    int _maxTag;
 }
 
 - (instancetype)init {
@@ -29,7 +32,6 @@
 
     return self;
 }
-
 
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
@@ -62,9 +64,18 @@
 
     [_contentView.widthAnchor constraintEqualToAnchor:self.view.widthAnchor].active = YES;
 
+    _nextPrevAccessoryView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 44)]; // this sucks, no autolayout with UIBarButtonItem
+    [_nextPrevAccessoryView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+    [_nextPrevAccessoryView setItems:@[
+            [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+            [[UIBarButtonItem alloc] initWithTitle:@"Prev" style:UIBarButtonItemStylePlain target:self action:@selector(prevTextField)],
+            [[UIBarButtonItem alloc] initWithTitle:@"Next" style:UIBarButtonItemStylePlain target:self action:@selector(nextTextField)] ]];
+
     UITextField *textField = nil;
     for (int i = 0; i < 15; ++i) {
         textField = [self addTextFieldWithText:[NSString stringWithFormat:@"testing%02i", i] toView:_contentView belowView:textField scrollToTop:(i%5==0)];
+        [textField setTag:i+1];
+        _maxTag = i+1;
     }
 
     [_contentView.bottomAnchor constraintEqualToAnchor:textField.bottomAnchor].active = YES;
@@ -88,7 +99,9 @@
     [textField.layer setBorderWidth:0.5];
     [textField setText:text];
     [textField setBackgroundColor:[UIColor whiteColor]];
+    [textField setReturnKeyType:UIReturnKeyDone];
     [textField setDelegate:self];
+    [textField setInputAccessoryView:_nextPrevAccessoryView];
     [containerView addSubview:textField];
     [textField.topAnchor constraintEqualToAnchor:belowView ? belowView.bottomAnchor : containerView.topAnchor constant:belowView ? 20 : 50].active = YES;
     [textField.leadingAnchor constraintEqualToAnchor:containerView.leadingAnchor constant:50].active = YES;
@@ -100,10 +113,17 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
+    _editingTextField = textField;
+
     if([_scrollToTopTextFields containsObject:textField]) {
         CGPoint point = CGPointMake(_scrollView.contentOffset.x, textField.frame.origin.y);
         [_scrollView setContentOffset:point animated:YES];
     }
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return YES;
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
@@ -115,6 +135,22 @@
 
 - (void)keyboardWillHide:(NSNotification *)notification {
     [_ScrollViewBottomAnchor setConstant:0];
+}
+
+- (void)prevTextField {
+    int nextTag = _editingTextField.tag - 1;
+    if(nextTag < 1) {
+        nextTag = _maxTag;
+    }
+    [[self.view viewWithTag:nextTag] becomeFirstResponder];
+}
+
+- (void)nextTextField {
+    int nextTag = _editingTextField.tag + 1;
+    if(nextTag > _maxTag) {
+        nextTag = 1;
+    }
+    [[self.view viewWithTag:nextTag] becomeFirstResponder];
 }
 
 @end
