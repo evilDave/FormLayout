@@ -17,7 +17,6 @@
 @implementation ViewController {
     UIScrollView *_scrollView;
     UIView *_contentView;
-    UITextField *_editingTextField;
     NSLayoutConstraint *_ScrollViewBottomAnchor;
     NSMutableSet *_scrollToTopTextFields;
 }
@@ -34,8 +33,13 @@
 
 - (void)loadView {
     UIView *view = [[UIView alloc] init];
-    [view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"Background"]]];
     [self setView:view];
+
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Background"]];
+    [imageView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.view addSubview:imageView];
+    [imageView.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor].active = YES;
+    [imageView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor].active = YES;
 
     _scrollView = [[UIScrollView alloc] init];
     [_scrollView setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -96,27 +100,17 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-    _editingTextField = textField;
-    
     if([_scrollToTopTextFields containsObject:textField]) {
         CGPoint point = CGPointMake(_scrollView.contentOffset.x, textField.frame.origin.y);
         [_scrollView setContentOffset:point animated:YES];
     }
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    _editingTextField = nil;
-}
-
 - (void)keyboardWillShow:(NSNotification *)notification {
     NSDictionary *userInfo = [notification userInfo];
     CGRect rect = [userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
     [_ScrollViewBottomAnchor setConstant:-rect.size.height];
-
-    if(![_scrollToTopTextFields containsObject:_editingTextField]) {
-        [self.view layoutIfNeeded];
-        [_scrollView scrollRectToVisible:_editingTextField.frame animated:YES];
-    }
+    [self.view layoutIfNeeded]; // prevent delay in scrolling
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
