@@ -8,6 +8,8 @@
 
 
 #import "ViewController.h"
+#import "UIBarButtonItem+DC.h"
+#import "CustomTextField.h"
 
 
 @interface ViewController () <UITextFieldDelegate>
@@ -69,11 +71,17 @@
     [_nextPrevAccessoryView setItems:@[
             [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
             [[UIBarButtonItem alloc] initWithTitle:@"Prev" style:UIBarButtonItemStylePlain target:self action:@selector(prevTextField)],
+            [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil].withWidth(10),
             [[UIBarButtonItem alloc] initWithTitle:@"Next" style:UIBarButtonItemStylePlain target:self action:@selector(nextTextField)] ]];
 
     UITextField *textField = nil;
     for (int i = 0; i < 15; ++i) {
-        textField = [self addTextFieldWithText:[NSString stringWithFormat:@"testing%02i", i] toView:_contentView belowView:textField scrollToTop:(i%5==0)];
+        if(i == 3 || i == 12) {
+            textField = [self addCustomTextFieldWithText:[NSString stringWithFormat:@"testing%02i", i] toView:_contentView belowView:textField scrollToTop:NO];
+        }
+        else {
+            textField = [self addTextFieldWithText:[NSString stringWithFormat:@"testing%02i", i] toView:_contentView belowView:textField scrollToTop:(i % 5 == 0)];
+        }
         [textField setTag:i+1];
         _maxTag = i+1;
     }
@@ -92,6 +100,11 @@
 
 - (UITextField *)addTextFieldWithText:(NSString *)text toView:(UIView *)containerView belowView:(UITextField *)belowView scrollToTop:(BOOL)scrollToTop {
     UITextField *textField = [[UITextField alloc] init];
+    [self setupTextField:textField withText:text toView:containerView belowView:belowView scrollToTop:scrollToTop];
+    return textField;
+}
+
+- (void)setupTextField:(UITextField *)textField withText:(NSString *)text toView:(UIView *)containerView belowView:(UITextField *)belowView scrollToTop:(BOOL)scrollToTop {
     [textField setTranslatesAutoresizingMaskIntoConstraints:NO];
     [textField setFont:[UIFont fontWithName:@"HelveticaNeue" size:scrollToTop ? 42 : 22]];
     [textField.layer setCornerRadius:5];
@@ -109,6 +122,12 @@
     if(scrollToTop) {
         [_scrollToTopTextFields addObject:textField];
     }
+}
+
+- (UITextField *)addCustomTextFieldWithText:(NSString *)text toView:(UIView *)containerView belowView:(UITextField *)belowView scrollToTop:(BOOL)scrollToTop {
+    UITextField *textField = [[CustomTextField alloc] init];
+    [self setupTextField:textField withText:text toView:containerView belowView:belowView scrollToTop:scrollToTop];
+    [textField.layer setBorderColor:[[UIColor redColor] CGColor]];
     return textField;
 }
 
